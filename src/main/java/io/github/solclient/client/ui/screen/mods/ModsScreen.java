@@ -21,7 +21,6 @@ package io.github.solclient.client.ui.screen.mods;
 import org.lwjgl.input.Keyboard;
 
 import io.github.solclient.client.SolClient;
-import io.github.solclient.client.extension.KeyBindingExtension;
 import io.github.solclient.client.mod.*;
 import io.github.solclient.client.mod.impl.core.CoreMod;
 import io.github.solclient.client.ui.*;
@@ -158,7 +157,7 @@ public class ModsScreen extends PanoramaBackgroundScreen {
 						.offset(done.getBounds().getX() - bounds.getWidth() - 4, getBaseX()));
 			}
 
-			search = new TextFieldComponent(0, false).autoFlush().onUpdate((ignored) -> {
+			search = new TextFieldComponent(0, 32, false).autoFlush().onUpdate((ignored) -> {
 				scroll.snapTo(0);
 				scroll.load();
 				return true;
@@ -203,17 +202,22 @@ public class ModsScreen extends PanoramaBackgroundScreen {
 				}
 
 				config = null;
-			} else if (mod != null && this.mod == null) {
+			} else if (mod != null) {
+				if (config != null)
+					remove(config);
+
 				config = mod.createConfigComponent();
 				add(config, Controller
 						.of(() -> new Rectangle(0, 45, getBounds().getWidth(), getBounds().getHeight() - 45)));
 
-				if (!singleModMode)
-					add(back, (component, defaultBounds) -> defaultBounds.offset(getBaseX(), getBaseX() + 2));
+				if (this.mod == null) {
+					if (!singleModMode)
+						add(back, (component, defaultBounds) -> defaultBounds.offset(getBaseX(), getBaseX() + 2));
 
-				if (!first) {
-					remove(search);
-					remove(scroll);
+					if (!first) {
+						remove(search);
+						remove(scroll);
+					}
 				}
 			}
 
@@ -303,7 +307,7 @@ public class ModsScreen extends PanoramaBackgroundScreen {
 
 			if (!result) {
 				if (keyCode == CoreMod.instance.modsKey.getCode()
-						&& KeyBindingExtension.from(CoreMod.instance.modsKey).areModsPressed()) {
+						&& KeyBindingInterface.from(CoreMod.instance.modsKey).areModsPressed()) {
 					mc.setScreen(null);
 					return true;
 				} else if (mod != null && (keyCode == Keyboard.KEY_BACK

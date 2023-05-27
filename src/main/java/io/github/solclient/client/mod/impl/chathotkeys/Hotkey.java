@@ -16,28 +16,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.solclient.client.util;
+package io.github.solclient.client.mod.impl.chathotkeys;
 
-import com.google.common.base.*;
+import com.google.gson.annotations.Expose;
 
-import lombok.RequiredArgsConstructor;
+import io.github.solclient.client.util.KeyBindingInterface;
+import lombok.*;
 
-@RequiredArgsConstructor
-public class DirtyMapper<I, O> {
+@EqualsAndHashCode
+@AllArgsConstructor
+public class Hotkey implements KeyBindingInterface {
 
-	private final Supplier<I> controlValueSupplier;
-	private final Function<I, O> mapper;
-	private I lastControlValue;
-	private O lastOutput;
+	@Expose
+	public int key;
+	@Getter
+	@Setter
+	@Expose
+	public int mods;
+	@Expose
+	public String value;
 
-	public O get() {
-		I controlValue = controlValueSupplier.get();
-
-		if (!controlValue.equals(lastControlValue)) {
-			lastControlValue = controlValue;
-			return lastOutput = mapper.apply(lastControlValue);
-		}
-
-		return lastOutput;
+	@Override
+	public int getKeyCode() {
+		return key;
 	}
+
+	@Override
+	public void setKeyCode(int keyCode) {
+		key = keyCode;
+	}
+
+	@Override
+	public void increaseTimesPressed() {
+	}
+
+	@Override
+	public void setPressed(boolean pressed) {
+	}
+
 }

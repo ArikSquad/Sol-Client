@@ -16,27 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.solclient.client.mod.impl.hud.crosshair;
+package io.github.solclient.client.event.impl;
 
-import io.github.solclient.client.mod.option.*;
-import io.github.solclient.client.ui.component.Component;
-import io.github.solclient.client.ui.component.controller.Controller;
-import io.github.solclient.client.util.data.PixelMatrix;
+import lombok.RequiredArgsConstructor;
 
-public class CrosshairOption extends ModOption<PixelMatrix> {
+@RequiredArgsConstructor
+public class KeyPressEvent {
 
-	CrosshairMod mod;
-
-	public CrosshairOption(CrosshairMod mod) {
-		super(mod.getTranslationKey("option.pixels"), ModOptionStorage.of(PixelMatrix.class, () -> mod.pixels));
-		this.mod = mod;
-	}
-
-	@Override
-	public Component createComponent() {
-		Component container = createDefaultComponent(190, false);
-		container.add(new CrosshairEditorComponent(this), Controller.none());
-		return container;
-	}
+	public final int key;
+	public boolean cancelled;
 
 }

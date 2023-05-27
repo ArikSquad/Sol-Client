@@ -40,7 +40,7 @@ dependencies {
 	shade(libs.mixin) { transitive = false }
 	shade occlusionCulling
 	shade(libs.hypixel.api) { transitive = false }
-	shade libs.discord.game.sdk4j
+	shade libs.discord.ipc
 	shade libs.java.websocket
 	shade libs.access.widener
 	shade libs.lwjgl.patched
@@ -80,25 +80,17 @@ dependencies {
 			break
 	}
 
-	runtimeOnly(variantOf(libs.lwjgl) {
-		classifier project.ext.lwjglNatives
-	}) {
-		transitive = false
-	}
-	runtimeOnly(variantOf(libs.lwjgl.nanovg) {
-		classifier project.ext.lwjglNatives
-	}) {
-		transitive = false
-	}
+	runtimeOnly(variantOf(libs.lwjgl) { classifier project.ext.lwjglNatives }) { transitive = false }
+	runtimeOnly(variantOf(libs.lwjgl.nanovg) { classifier project.ext.lwjglNatives }) { transitive = false }
 
-	shadeOnly variantOf(libs.lwjgl) { classifier 'natives-windows' }
-	shadeOnly variantOf(libs.lwjgl) { classifier 'natives-linux' }
-	shadeOnly variantOf(libs.lwjgl) { classifier 'natives-macos' }
-	shadeOnly variantOf(libs.lwjgl) { classifier 'natives-macos-arm64' }
-	shadeOnly variantOf(libs.lwjgl.nanovg) { classifier 'natives-windows' }
-	shadeOnly variantOf(libs.lwjgl.nanovg) { classifier 'natives-linux' }
-	shadeOnly variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos' }
-	shadeOnly variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos-arm64' }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-windows' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-linux' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-macos' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-macos-arm64' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-windows' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-linux' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos-arm64' }) { transitive = false }
 }
 
 loom {
@@ -117,7 +109,7 @@ loom {
 
 java {
 	group 'io.github.solclient'
-	version file('version.txt').getText('UTF-8')
+	version file('version.txt').getText('UTF-8').split('\n')[0]
 
 	sourceCompatibility = 8
 	targetCompatibility = 8

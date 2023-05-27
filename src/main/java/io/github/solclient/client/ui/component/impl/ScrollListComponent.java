@@ -50,7 +50,7 @@ public class ScrollListComponent extends ListComponent {
 			return;
 		}
 
-		parent.add(scrollbar = new BlockComponent(Theme.buttonSecondary(), Controller.of(1.5F), Controller.of(0F)) {
+		parent.add(scrollbar = new BlockComponent(Controller.of(() -> Theme.getCurrent().buttonSecondary), Controller.of(1.5F), Controller.of(0F)) {
 
 			@Override
 			public void render(ComponentRenderInfo info) {
@@ -100,7 +100,7 @@ public class ScrollListComponent extends ListComponent {
 				jumpTo((int) (targetCompY / (getBounds().getHeight() / (double) getContentHeight())));
 				clamp();
 			} else if (grabStartY != -1) {
-				jumpTo(grabStartY - (info.relativeMouseY() - grabMouseY));
+				jumpTo(grabStartY - (((int) info.relativeMouseY()) - grabMouseY));
 				clamp();
 			}
 		}

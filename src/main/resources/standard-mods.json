@@ -116,6 +116,7 @@
 	{
 		"id": "tab_list",
 		"main": "hud.tablist.TabListMod",
+		"mixins": "@hud.tablist.mixins",
 		"category": "hud",
 		"enabledByDefault": true
 	},
@@ -128,8 +129,7 @@
 	{
 		"id": "scoreboard",
 		"main": "hud.ScoreboardMod",
-		"category": "hud",
-		"enabledByDefault": true
+		"category": "hud"
 	},
 	{
 		"id": "boss_bar",
@@ -174,7 +174,8 @@
 	{
 		"id": "zoom",
 		"main": "ZoomMod",
-		"category": "utility"
+		"category": "utility",
+		"enabledByDefault": true
 	},
 	{
 		"id": "scrollable_tooltips",
@@ -186,6 +187,12 @@
 		"id": "screenshots",
 		"main": "screenshots.ScreenshotsMod",
 		"mixins": "@screenshots.mixins",
+		"category": "utility",
+		"enabledByDefault": true
+	},
+	{
+		"id": "chat_hotkeys",
+		"main": "chathotkeys.ChatHotkeysMod",
 		"category": "utility"
 	},
 	// visual
@@ -214,7 +221,8 @@
 		"id": "1.7_visuals",
 		"main": "v1_7visuals.V1_7VisualsMod",
 		"mixins": "@v1_7visuals.mixins",
-		"category": "visual"
+		"category": "visual",
+		"enabledByDefault": true
 	},
 	{
 		"id": "item_physics",
@@ -257,7 +265,8 @@
 	{
 		"id": "quickplay",
 		"main": "quickplay.QuickPlayMod",
-		"category": "integration"
+		"category": "integration",
+		"enabledByDefault": true
 	},
 	{
 		"id": "discord_integration",

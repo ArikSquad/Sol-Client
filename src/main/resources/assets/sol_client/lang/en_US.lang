@@ -198,8 +198,9 @@ sol_client.mod.tab_list.option.pingType.numeral=Number
 
 sol_client.mod.tab_list.option.backgroundColour=List background color
 sol_client.mod.tab_list.option.entryBackgroundColour=Entry background color
-sol_client.mod.tab_list.option.hidePlayerHeads=Hide player heads
+sol_client.mod.tab_list.option.playerHeads=Player heads
 sol_client.mod.tab_list.option.textShadow=Text shadow
+sol_client.mod.tab_list.option.compactColumns=Compact columns
 
 sol_client.mod.crosshair.name=Crosshair
 sol_client.mod.crosshair.description=Customize the crosshair.
@@ -423,6 +424,17 @@ sol_client.mod.screenshots.delete=Delete
 sol_client.mod.screenshots.delete_error=An error occurred during deletion: %s. You can try opening %s instead.
 sol_client.mod.screenshots.deleted=The screenshot was deleted
 
+sol_client.mod.chat_hotkeys.name=Chat Hotkeys
+sol_client.mod.chat_hotkeys.description=Bind commands and messages to keys.
+
+sol_client.mod.chat_hotkeys.option.hotkeys=Hotkeys
+sol_client.mod.chat_hotkeys.option.cooldown=Rate limit
+
+sol_client.mod.chat_hotkeys.clear=Clear
+sol_client.mod.chat_hotkeys.message=Message
+sol_client.mod.chat_hotkeys.empty=Your message ("%s") is empty.
+sol_client.mod.chat_hotkeys.cooldown=You are using hotkeys faster than the configured rate.
+
 sol_client.mod.time_changer.name=Time Changer
 sol_client.mod.time_changer.description=Change the visual time without affecting gameplay.
 
@@ -477,7 +489,12 @@ sol_client.mod.discord_integration.option.usernameColour=Username colour
 sol_client.mod.discord_integration.option.mutedColour=Muted colour
 sol_client.mod.discord_integration.option.speakingColour=Speaking colour
 
+sol_client.mod.discord_integration.buttons=Buttons
+sol_client.mod.discord_integration.label=Label
+sol_client.mod.discord_integration.url=URL
+
 sol_client.mod.discord_integration.multiplayer=Multiplayer: %s
+sol_client.mod.discord_integration.main_menu=Main Menu
 
 sol_client.mod.screen.title=Modules
 sol_client.mod.screen.search=Type to search

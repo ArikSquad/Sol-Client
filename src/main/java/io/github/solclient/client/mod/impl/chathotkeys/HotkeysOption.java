@@ -16,27 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.solclient.client.mod.impl.hud.crosshair;
+package io.github.solclient.client.mod.impl.chathotkeys;
+
+import java.util.*;
 
 import io.github.solclient.client.mod.option.*;
 import io.github.solclient.client.ui.component.Component;
-import io.github.solclient.client.ui.component.controller.Controller;
-import io.github.solclient.client.util.data.PixelMatrix;
 
-public class CrosshairOption extends ModOption<PixelMatrix> {
+final class HotkeysOption extends ModOption<List<Hotkey>> {
 
-	CrosshairMod mod;
+	private final ChatHotkeysMod mod;
 
-	public CrosshairOption(CrosshairMod mod) {
-		super(mod.getTranslationKey("option.pixels"), ModOptionStorage.of(PixelMatrix.class, () -> mod.pixels));
+	public HotkeysOption(ChatHotkeysMod mod) {
+		super(mod.getTranslationKey("hotkeys"),
+				ModOptionStorage.of((Class<List<Hotkey>>) (Object) Map.class, () -> mod.entries));
 		this.mod = mod;
 	}
 
 	@Override
 	public Component createComponent() {
-		Component container = createDefaultComponent(190, false);
-		container.add(new CrosshairEditorComponent(this), Controller.none());
-		return container;
+		return new HotkeysComponent(mod, this);
 	}
 
 }
