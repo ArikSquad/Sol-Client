@@ -178,7 +178,7 @@ sol_client.mod.tab_list.option.pingType.numeral=Numero
 
 sol_client.mod.tab_list.option.backgroundColour=Luettelon taustaväri
 sol_client.mod.tab_list.option.entryBackgroundColour=Sisääntulon taustaväri
-sol_client.mod.tab_list.option.hidePlayerHeads=Piilota pelaajien päät
+sol_client.mod.tab_list.option.playerHeads=Pelaajien päät
 sol_client.mod.tab_list.option.textShadow=Tekstin varjo
 
 sol_client.mod.crosshair.name=Tähtäin

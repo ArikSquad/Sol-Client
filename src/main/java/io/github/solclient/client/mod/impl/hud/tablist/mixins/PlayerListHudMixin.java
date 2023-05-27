@@ -74,7 +74,7 @@ public class PlayerListHudMixin {
 	}
 
 	private boolean shouldShowHeads() {
-		return !(TabListMod.enabled && TabListMod.instance.playerHeads);
+		return !(TabListMod.enabled && !TabListMod.instance.playerHeads);
 	}
 
 	@ModifyConstant(method = "render", constant = @Constant(intValue = Integer.MIN_VALUE))
