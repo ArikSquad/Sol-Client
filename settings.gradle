@@ -1,15 +1,27 @@
 pluginManagement {
 	repositories {
 		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		maven {
 			name = 'Quilt'
 			url = 'https://maven.quiltmc.org/repository/release'
 		}
 		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
+			name = 'LegacyFabric'
+			url = 'https://repo.legacyfabric.net/legacyfabric'
 		}
 		gradlePluginPortal()
 	}
 }
 
-rootProject.name = 'sol-client-wrapper'
+rootProject.name = 'sol-client'
+
+// The common project contains no Minecraft references. Every version module
+// owns its mappings, loader, mixins, and any version-specific game code.
+include ':common'
+include ':versions:1.8'
+include ':versions:1.21.11'
+include ':versions:26.2'
+include ':bundle'

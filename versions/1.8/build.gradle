@@ -1,0 +1,201 @@
+import org.gradle.internal.os.OperatingSystem
+import io.github.solclient.gradle.remapping.ReplayModRemapper
+import io.github.solclient.gradle.dist.DistTask
+
+plugins {
+	id 'maven-publish'
+	id 'fabric-loom' version '1.15-SNAPSHOT'
+	id 'legacy-looming' version '1.15-SNAPSHOT'
+	alias libs.plugins.shadow
+}
+
+def legacyLoaderVersion = '0.18.3'
+def lwjglVersion = '3.3.1'
+
+base {
+	archivesName = 'sol-client-1.8'
+}
+
+repositories {
+	mavenCentral()
+	maven { url = 'https://maven.fabricmc.net' }
+	maven { url = 'https://repo.legacyfabric.net/repository/legacyfabric' }
+	maven { url = 'https://repo.hypixel.net/repository/Hypixel' }
+	maven { url = 'https://jitpack.io' }
+	maven { url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1' }
+}
+
+configurations {
+	shadeOnly
+	shade
+	implementation.extendsFrom shade
+	shadeOnly.extendsFrom shade
+}
+
+def remapper = new ReplayModRemapper(project)
+remapper.prepare()
+
+legacyLooming {
+	// The existing 1.8 source and remapped ReplayMod artifacts use the
+	// second-generation Legacy Fabric intermediary namespace.
+	intermediaryVersion = 2
+	// Generation 2 mappings are published in the upstream intermediary
+	// namespace; Legacy Looming's generation-2 LF endpoint uses a different
+	// namespace and cannot be composed with the existing Yarn artifact.
+	useLFIntermediary.set(false)
+}
+
+dependencies {
+	minecraft(libs.minecraft) { exclude group: 'org.apache.logging.log4j' }
+	// The platform adapters from the multiversion sketch target the stable
+	// 1.8.9 Legacy Fabric namespace (the newer Yarn build renamed several
+	// packages, including GameOptions).
+	mappings 'net.legacyfabric:yarn:1.8.9+build.386:v2'
+	shade variantOf(libs.intermediary) { classifier 'v2' }
+
+	def occlusionCulling = files(rootProject.file('libs/occlusionculling.jar'))
+
+	shade(libs.mixin) { transitive = false }
+	// Mixin 0.8.5 probes its historical LaunchWrapper service during
+	// bootstrap.  Legacy Fabric uses the custom wrapper below, but the
+	// service class still has to be loadable so Mixin can reject it cleanly.
+	shade 'net.minecraft:launchwrapper:1.12'
+	shade occlusionCulling
+	shade project(':common')
+	shade(libs.hypixel.api) { transitive = false }
+	shade libs.discord.ipc
+	shade libs.java.websocket
+	shade libs.access.widener
+	// The patched bridge contains the LWJGL 3 system/NanoVG Java classes with
+	// PointerBuffer relocated away from Minecraft's LWJGL 2 classes. Do not
+	// add the ordinary lwjgl-nanovg Java jar here: its transitive LWJGL 3
+	// classes would win class loading and recreate the PointerBuffer verifier
+	// failure on the legacy runtime.
+	shade libs.lwjgl.patched
+	shade libs.tiny.remapper
+	implementation libs.devauth
+	// The legacy launcher remains custom, but the loader API is needed on the
+	// compile classpath for Fabric's environment annotations in Minecraft.
+	compileOnly "net.fabricmc:fabric-loader:${legacyLoaderVersion}"
+	compileOnly 'org.projectlombok:lombok:1.18.42'
+	annotationProcessor 'org.projectlombok:lombok:1.18.42'
+
+	implementation libs.asm
+	implementation libs.asm.analysis
+	implementation libs.asm.commons
+	implementation libs.asm.tree
+	implementation libs.asm.util
+
+	annotationProcessor libs.asm
+	annotationProcessor libs.asm.analysis
+	annotationProcessor libs.asm.commons
+	annotationProcessor libs.asm.tree
+	annotationProcessor libs.asm.util
+
+	implementation files(remapper.createNamedMapped())
+	shadeOnly files(remapper.createIntermediaryMapped())
+
+	switch (OperatingSystem.current()) {
+		case OperatingSystem.LINUX:
+			def osArch = System.getProperty('os.arch')
+			project.ext.lwjglNatives = osArch.startsWith('arm') || osArch.startsWith('aarch64')
+				? "natives-linux-${osArch.contains('64') || osArch.startsWith('armv8') ? 'arm64' : 'arm32'}"
+				: "natives-linux"
+			break
+		case OperatingSystem.MAC_OS:
+			project.ext.lwjglNatives = System.getProperty('os.arch').startsWith('aarch64') ? 'natives-macos-arm64' : 'natives-macos'
+			break
+		case OperatingSystem.WINDOWS:
+			def osArch = System.getProperty('os.arch')
+			project.ext.lwjglNatives = osArch.contains('64')
+				? "natives-windows${osArch.startsWith('aarch64') ? '-arm64' : ''}"
+				: 'natives-windows-x86'
+			break
+	}
+
+	// Use explicit classifier coordinates here. Legacy Looming otherwise
+	// reintroduces the unclassified LWJGL 3 Java artifacts into the launch
+	// classpath alongside the patched bridge.
+	runtimeOnly("org.lwjgl:lwjgl:${lwjglVersion}:${project.ext.lwjglNatives}") { transitive = false }
+	runtimeOnly("org.lwjgl:lwjgl-nanovg:${lwjglVersion}:${project.ext.lwjglNatives}") { transitive = false }
+
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-windows' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-linux' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-macos' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl) { classifier 'natives-macos-arm64' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-windows' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-linux' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos' }) { transitive = false }
+	shadeOnly(variantOf(libs.lwjgl.nanovg) { classifier 'natives-macos-arm64' }) { transitive = false }
+}
+
+loom {
+	log4jConfigs.setFrom project.rootProject.file('log4j2.xml')
+	accessWidenerPath = project.file('src/main/resources/replay-mod.accesswidener')
+
+	runConfigs.each {
+		// The legacy target uses the multiversion wrapper from the common
+		// architecture. It loads this module's platform mixins before Minecraft.
+		it.defaultMainClass 'io.github.solclient.client.wrapper.BootstrapMain'
+		it.vmArgs.add '-Dio.github.solclient.client.mc_version=1.8.9'
+		it.vmArgs.add '-Dio.github.solclient.client.version=dev'
+		it.vmArgs.add '-Dio.github.solclient.client.project_root=' + rootProject.projectDir.absolutePath
+		it.programArgs.add '--accessToken'
+		it.programArgs.add '0'
+		it.programArgs.add '--username'
+		it.programArgs.add 'Player'
+		it.programArgs.add '--version'
+		it.programArgs.add '1.8.9'
+	}
+}
+
+java {
+	group = 'io.github.solclient'
+	version = rootProject.version
+
+	sourceCompatibility = 8
+	targetCompatibility = 8
+
+	jar {
+		enabled = false
+		dependsOn shadowJar
+	}
+}
+
+shadowJar {
+	finalizedBy remapJar
+	from(rootProject.file('LICENSE')) {
+		rename { "${it}_${name}" }
+	}
+	configurations = [project.configurations.shadeOnly]
+	archiveClassifier.set 'dev'
+	destinationDirectory.set project.file("$buildDir/devlibs")
+}
+
+tasks.register('dist', DistTask) {
+	dependsOn build
+	input = tasks.remapJar.outputs.files.getAt 0
+	destination = file "$buildDir/dist"
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = 'UTF-8'
+	it.options.release = 8
+}
+
+// Configure the maven publication
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}

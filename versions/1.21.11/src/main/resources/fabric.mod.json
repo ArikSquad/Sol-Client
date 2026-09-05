@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "sol-client",
+	"version": "${version}",
+	"name": "Sol Client",
+	"description": "Sol Client version adapter for Minecraft 1.21.11.",
+	"authors": ["Sol Client contributors"],
+	"license": "GPL-3.0-or-later",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"io.github.solclient.client.v1_21_11.FabricClientEntrypoint"
+		]
+	},
+	"mixins": [
+		{
+			"config": "sol-client-1.21.11.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~1.21.11",
+		"fabric-api": "${fabricApiVersion}",
+		"java": ">=21"
+	}
+}

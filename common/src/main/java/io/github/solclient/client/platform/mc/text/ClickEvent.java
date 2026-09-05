@@ -1,0 +1,32 @@
+package io.github.solclient.client.platform.mc.text;
+
+import org.jetbrains.annotations.NotNull;
+
+import io.github.solclient.client.platform.VirtualEnum;
+import io.github.solclient.client.platform.PlatformServices;
+
+public interface ClickEvent {
+
+	static ClickEvent create(Action action, String value) {
+		return PlatformServices.get().createClickEvent(action, value);
+	}
+
+	@NotNull Action action();
+
+	@NotNull String value();
+
+	interface Action extends VirtualEnum {
+
+		Action OPEN_URL = get("OPEN_URL"),
+				OPEN_FILE = get("OPEN_FILE"),
+				RUN_COMMAND = get("RUN_COMMAND"),
+				SUGGEST_COMMAND = get("SUGGEST_COMMAND"),
+				CHANGE_PAGE = get("CHANGE_PAGE");
+
+		static Action get(String name) {
+			return PlatformServices.get().clickAction(name);
+		}
+
+	}
+
+}

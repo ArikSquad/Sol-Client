@@ -1,0 +1,35 @@
+{
+	"required": false,
+	"package": "io.github.solclient.client.v1_21_11.mixins",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"MinecraftClientMixin",
+		"TitleScreenMixin",
+		"WindowMixin",
+		"GuiMixin",
+		"GuiRendererMixin",
+		"BlockSelectionMixin",
+		"GameRendererMixin",
+		"CameraTransformMixin",
+		"LevelTimeMixin",
+		"LightTextureMixin",
+		"MouseHandlerMixin",
+		"ItemEntityRendererMixin",
+		"HitboxRenderMixin",
+		"FirstPersonItemTransformMixin",
+		"EntityAttackMixin",
+		"EntityDamageMixin",
+		"TntRendererMixin",
+		"HitOverlayRenderMixin",
+		"ChunkRenderMixin",
+		"SoundEngineMixin",
+		"ChatComponentAccessor",
+		"CulledEntityMixin",
+		"CulledBlockEntityMixin",
+		"EntityRenderDispatcherCullingMixin",
+		"BlockEntityRenderDispatcherCullingMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

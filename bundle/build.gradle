@@ -1,0 +1,34 @@
+plugins {
+	id 'base'
+}
+
+def versionProjects = [
+	[path: '1.8', project: ':versions:1.8', task: 'remapJar'],
+	[path: '1.21.11', project: ':versions:1.21.11', task: 'remapJar'],
+	[path: '26.2', project: ':versions:26.2', task: 'jar']
+]
+
+tasks.register('bundleVersions', Zip) {
+	group = 'distribution'
+	description = 'Packages the standalone artifacts for every supported Minecraft version.'
+	archiveFileName = "sol-client-${project.version}-versions.zip"
+	destinationDirectory = layout.buildDirectory.dir('distributions')
+	dependsOn versionProjects.collect { target -> "${target.project}:${target.task}" }
+
+	versionProjects.each { target ->
+		from {
+			project(target.project).tasks.named(target.task).get().outputs.files
+		} {
+			into "versions/${target.path}"
+		}
+	}
+
+	from(rootProject.file('version.txt')) {
+		into 'metadata'
+		rename { 'client-version.txt' }
+	}
+}
+
+tasks.named('assemble') {
+	dependsOn tasks.named('bundleVersions')
+}

@@ -1,0 +1,113 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap' version '1.17-SNAPSHOT'
+}
+
+def minecraftVersion = '1.21.11'
+def loaderVersion = '0.19.5'
+def fabricApiVersion = '0.141.4+1.21.11'
+def nanovgNatives = System.getProperty('os.name').toLowerCase().contains('win') ? 'natives-windows'
+		: (System.getProperty('os.name').toLowerCase().contains('mac')
+				? (System.getProperty('os.arch').toLowerCase().contains('aarch64') ? 'natives-macos-arm64' : 'natives-macos')
+				: 'natives-linux')
+def nanoVgVersion = '3.3.3'
+def commonModResources = project(':common').file('src/main/resources/assets/sol_client')
+def commonGuiResources = project(':common').file('src/main/resources/assets/minecraft/textures/gui')
+def commonCrosshairResource = project(':common').file('src/main/resources/assets/minecraft/textures/gui/sol_client_crosshairs.png')
+
+base {
+	archivesName = 'sol-client-' + minecraftVersion
+}
+
+loom {
+	splitEnvironmentSourceSets()
+	mods {
+		'sol-client' {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+configurations {
+	nanoVgNatives
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraftVersion}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+	implementation 'org.lwjgl:lwjgl-nanovg:' + nanoVgVersion
+	runtimeOnly('org.lwjgl:lwjgl-nanovg:' + nanoVgVersion + ':' + nanovgNatives) { transitive = false }
+	nanoVgNatives 'org.lwjgl:lwjgl-nanovg:' + nanoVgVersion + ':natives-linux'
+	nanoVgNatives 'org.lwjgl:lwjgl-nanovg:' + nanoVgVersion + ':natives-windows'
+	nanoVgNatives 'org.lwjgl:lwjgl-nanovg:' + nanoVgVersion + ':natives-macos'
+	nanoVgNatives 'org.lwjgl:lwjgl-nanovg:' + nanoVgVersion + ':natives-macos-arm64'
+	implementation project(':common')
+}
+
+// The version jar is standalone for launcher installs; common contains no
+// game classes and is safe to embed in every target artifact.
+tasks.named('jar') {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from { project(':common').sourceSets.main.output.classesDirs }
+	from { project(':common').sourceSets.main.resources }
+	from { configurations.runtimeClasspath.findAll { it.name == 'lwjgl-nanovg-' + nanoVgVersion + '.jar' }.collect { zipTree(it) } } {
+		include 'org/lwjgl/nanovg/**'
+	}
+	from { configurations.nanoVgNatives.collect { zipTree(it) } } {
+		include 'linux/**'
+		include 'windows/**'
+		include 'macos/**'
+		include 'META-INF/linux/**'
+		include 'META-INF/windows/**'
+		include 'META-INF/macos/**'
+	}
+}
+
+processResources {
+	from project(':common').sourceSets.main.resources
+	from(commonModResources) {
+		into 'assets/sol-client'
+	}
+	from(commonGuiResources) {
+		into 'assets/sol-client/textures/gui'
+	}
+	from(commonCrosshairResource) {
+		into 'assets/sol-client'
+		rename { 'crosshairs.png' }
+	}
+	def clientVersion = project.version.toString()
+	inputs.property 'version', clientVersion
+	inputs.property 'fabricApiVersion', fabricApiVersion
+	filesMatching('fabric.mod.json') {
+		expand version: clientVersion, fabricApiVersion: fabricApiVersion
+	}
+}
+
+// Loom's split source sets put the client launch classpath on the client
+// resources directory. Keep the shared UI assets and translations there as
+// well as in the main output used by the final jar.
+tasks.named('processClientResources') {
+	from project(':common').sourceSets.main.resources
+	from(commonModResources) {
+		into 'assets/sol-client'
+	}
+	from(commonGuiResources) {
+		into 'assets/sol-client/textures/gui'
+	}
+	from(commonCrosshairResource) {
+		into 'assets/sol-client'
+		rename { 'crosshairs.png' }
+	}
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.release = 21
+}
